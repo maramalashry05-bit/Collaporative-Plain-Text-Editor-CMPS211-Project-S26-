@@ -22,5 +22,5 @@ public class Char_Node {
     public void markAsDeleted() { this.isDeleted = true; }
     public boolean isDeleted() { return isDeleted; }
     
-    // Methods for bold/italic toggles would go here
+    // Methods for bold/italic toggles would go here..........
 }
