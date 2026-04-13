@@ -1,4 +1,4 @@
-public class Operation{
+public class Character_Operation{
     public enum Type {INSERT,DELETE}
     public Type type;
     public String userID;
@@ -7,7 +7,7 @@ public class Operation{
     public int position;
     public char character;
 
-    public Operation(Type type, String userID, int timestamp, String blockID, int position, char character){
+    public Character_Operation(Type type, String userID, int timestamp, String blockID, int position, char character){
         this.type=type;
         this.userID=userID;
         this.timestamp=timestamp;

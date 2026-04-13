@@ -56,4 +56,19 @@ import java.util.LinkedList;
     public LinkedList<Block_Node> getBlocks(){
             return blocks;  
     }
+
+    public void insertCharacter(String blockID, Char_Node charNode) {
+        Block_Node block = getSpecificBlock(blockID);
+        if (block != null && !block.isDeleted()) {
+            block.getContent().insert(charNode);
+        }
+}
+
+    public String getBlockText(String blockID) {
+        Block_Node block = getSpecificBlock(blockID);
+        if (block != null && !block.isDeleted()) {
+            return block.getContent().getVisibleText();
+        }
+        return "";
+    }
 }

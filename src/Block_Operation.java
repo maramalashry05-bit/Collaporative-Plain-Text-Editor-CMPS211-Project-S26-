@@ -13,4 +13,9 @@ public class Block_Operation {
         this.blockID=blockID;
         this.parentBlockID=parentBlockID;
     }
+
+    @Override
+    public String toString() {
+         return type + " block " + blockID + " under " + parentBlockID + " by " + userID + " at time " + timestamp;
+}
 }

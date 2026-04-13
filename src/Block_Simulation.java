@@ -123,17 +123,12 @@ public class Block_Simulation {
         System.out.println("Starting Block CRDT Operations");
         System.out.println("-------------------------");
 
-        // User1 wants to insert block1 after root at timestamp 1
-        Block_Operation op1 = new Block_Operation(Block_Operation.Type.INSERT, "User1", 1, "block1", "root");
-        // User2 wants to insert block2 after root at timestamp 2 - concurrent with User1
-        Block_Operation op2 = new Block_Operation(Block_Operation.Type.INSERT, "User2", 2, "block2", "root");
-        // User1 wants to delete block1 at timestamp 3
-        Block_Operation op3 = new Block_Operation(Block_Operation.Type.DELETE, "User1", 3, "block1", "root");
+       User user1 = new User("User1");
+User user2 = new User("User2");
 
-        // print all operations like teammate did in his simulation
-        System.out.println(op1.type + " " + op1.blockID + " by " + op1.userID + " at time " + op1.timestamp);
-        System.out.println(op2.type + " " + op2.blockID + " by " + op2.userID + " at time " + op2.timestamp);
-        System.out.println(op3.type + " " + op3.blockID + " by " + op3.userID + " at time " + op3.timestamp);
+Block_Operation op1 = user1.createBlockInsert("block1", "root");
+Block_Operation op2 = user2.createBlockInsert("block2", "root");
+Block_Operation op3 = user1.createBlockDelete("block1", "root");
 
         // now run all tests to verify everything works correctly
         System.out.println("-------------------------");

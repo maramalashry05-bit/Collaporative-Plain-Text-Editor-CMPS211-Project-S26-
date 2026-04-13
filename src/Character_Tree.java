@@ -54,4 +54,27 @@ public class Character_Tree {
             buildTextRec(node.getRight(), textBuilder);
         }
     }
+
+    //delete operation
+    public void delete(Char_ID targetid) {
+        deleteRec(root, targetid);
+    }
+
+    private void deleteRec(CRDT_Tree_Node current, Char_ID targetid) {
+        // If we reach an empty spot, doc is empty
+        if (current == null) {
+            return;
+        }
+
+        int comparison = targetid.compareTo(current.getCharNode().getId());
+
+        if (comparison < 0) {
+            deleteRec(current.getLeft(),targetid);
+        } else if (comparison > 0) {
+           deleteRec(current.getRight(), targetid);
+        } else {
+            //found, mark as deleted
+            current.getCharNode().markAsDeleted();
+        }
+    }
 }
