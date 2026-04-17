@@ -86,7 +86,7 @@ public class EditorPane extends StackPane {
     }
 
     public void applyRemoteDelete(int position) {
-        com.texteditor.apt.Char_Node node = crdtState.getNodeAtIndex(position);
+        com.texteditor.apt.CRDT.Char_Node node = crdtState.getNodeAtIndex(position);
         if (node == null) return;
         String newText = crdtState.applyRemoteDelete(node.getId());
         int savedCaret = textArea.getCaretPosition();
@@ -118,31 +118,50 @@ public class EditorPane extends StackPane {
             }
         });
 
-        textArea.setOnKeyTyped(event -> {
-            if (updatingFromCRDT) return;
-            String typed = event.getCharacter();
-            if (typed == null || typed.isEmpty()) return;
-            char c = typed.charAt(0);
-            if (c < 32 && c != '\n' && c != '\t') return;
-            if (c == 127) return;
-            event.consume();
-            int caret = textArea.getCaretPosition();
-            String newText = crdtState.localInsert(caret, c);
-            refreshTextArea(newText, caret + 1);
-            if (wsClient != null) {
-                wsClient.sendInsert(caret, c, currentBlockId);
-            }
-        });
+       textArea.setOnKeyTyped(event -> {
+    if (updatingFromCRDT) return;
+    
+    String typed = event.getCharacter();
+    if (typed == null || typed.isEmpty()) return;
+    
+    char c = typed.charAt(0);
+    // Standard validation
+    if (c < 32 && c != '\n' && c != '\r' && c != '\t') return;
+    if (c == 127) return;
+
+    // --- KEY CHANGE HERE ---
+    event.consume(); // This stops JavaFX from typing the character itself
+    // -----------------------
+
+    int caret = textArea.getCaretPosition();
+    
+    // Manually update your state
+    String newText = crdtState.localInsert(caret, c);
+    
+    // Manually update the UI and move the cursor
+    refreshTextArea(newText, caret + 1);
+    
+    // Send to server
+    if (wsClient != null) {
+        wsClient.sendInsert(caret, c, currentBlockId);
+    }
+});
     }
 
-    private void refreshTextArea(String newText, int newCaret) {
-        updatingFromCRDT = true;
-        textArea.setText(newText);
+   private void refreshTextArea(String newText, int newCaret) {
+    updatingFromCRDT = true;
+    
+    // 1. Update the text
+    textArea.setText(newText);
+    
+    // 2. Use runLater to ensure the cursor moves AFTER the UI paints the text
+    javafx.application.Platform.runLater(() -> {
         int clampedCaret = Math.max(0, Math.min(newCaret, newText.length()));
         textArea.positionCaret(clampedCaret);
         updatingFromCRDT = false;
-        paintCursors();
-    }
+        paintCursors(); // Redraw those cool remote cursors
+    });
+}
 
     private void paintCursors() {
         GraphicsContext gc = cursorCanvas.getGraphicsContext2D();

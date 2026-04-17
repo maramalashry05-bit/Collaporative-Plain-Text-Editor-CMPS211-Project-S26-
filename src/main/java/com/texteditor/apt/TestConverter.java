@@ -1,5 +1,8 @@
 package com.texteditor.apt;
 
+import com.texteditor.apt.CRDT.Block_Operation;
+import com.texteditor.apt.CRDT.Character_Operation;
+
 public class TestConverter {
     public static void main(String[] args) {
 

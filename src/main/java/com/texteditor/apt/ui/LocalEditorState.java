@@ -1,9 +1,9 @@
 package com.texteditor.apt.ui;
 
-import com.texteditor.apt.Character_Tree;
-import com.texteditor.apt.Char_ID;
-import com.texteditor.apt.Char_Node;
-import com.texteditor.apt.CRDT_ID_Generator;
+import com.texteditor.apt.CRDT.CRDT_ID_Generator;
+import com.texteditor.apt.CRDT.Char_ID;
+import com.texteditor.apt.CRDT.Char_Node;
+import com.texteditor.apt.CRDT.Character_Tree;
 
 public class LocalEditorState {
 

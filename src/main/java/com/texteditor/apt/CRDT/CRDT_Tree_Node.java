@@ -1,4 +1,4 @@
-package com.texteditor.apt;
+package com.texteditor.apt.CRDT;
 
 public class CRDT_Tree_Node {
     private Char_Node charNode; // The actual character and its ID

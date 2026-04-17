@@ -1,5 +1,7 @@
 package com.texteditor.apt;
 
+import com.texteditor.apt.CRDT.Block_CRDT;
+
 public class ActiveDocument{
     
     String docID;

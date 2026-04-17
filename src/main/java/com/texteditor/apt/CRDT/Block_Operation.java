@@ -1,4 +1,4 @@
-package com.texteditor.apt;
+package com.texteditor.apt.CRDT;
 
 public class Block_Operation {
     public enum Type {INSERT,DELETE}

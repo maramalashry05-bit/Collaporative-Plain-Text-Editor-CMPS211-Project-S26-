@@ -1,5 +1,9 @@
 package com.texteditor.apt;
 
+import com.texteditor.apt.CRDT.Block_CRDT;
+import com.texteditor.apt.CRDT.Block_Operation;
+import com.texteditor.apt.CRDT.Character_Operation;
+
 public class TestPhase2p3 {
     public static void main(String[] args) {
 

@@ -1,4 +1,4 @@
-package com.texteditor.apt;
+package com.texteditor.apt.CRDT;
 
 import java.util.LinkedList;
 

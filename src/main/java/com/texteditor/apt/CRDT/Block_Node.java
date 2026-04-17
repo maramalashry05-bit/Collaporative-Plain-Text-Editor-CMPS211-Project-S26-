@@ -1,4 +1,4 @@
-package com.texteditor.apt;
+package com.texteditor.apt.CRDT;
 
 public class Block_Node {
     private String blockID;

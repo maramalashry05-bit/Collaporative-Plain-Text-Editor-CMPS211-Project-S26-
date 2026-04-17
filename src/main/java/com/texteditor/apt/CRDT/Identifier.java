@@ -1,4 +1,4 @@
-package com.texteditor.apt;
+package com.texteditor.apt.CRDT;
 
 public class Identifier implements Comparable<Identifier> {
     private int digit;      // The positional number (e.g., 1, 5, 10)

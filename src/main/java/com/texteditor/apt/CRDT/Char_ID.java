@@ -1,4 +1,4 @@
-package com.texteditor.apt;
+package com.texteditor.apt.CRDT;
 
 public class Char_ID implements Comparable<Char_ID> {
     private final Identifier[] position;

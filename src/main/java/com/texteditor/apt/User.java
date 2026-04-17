@@ -3,6 +3,9 @@ package com.texteditor.apt;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.texteditor.apt.CRDT.Block_Operation;
+import com.texteditor.apt.CRDT.Character_Operation;
+
 public class User{
     public String userID;
     public List<Character_Operation> charoperationList=new ArrayList<>();

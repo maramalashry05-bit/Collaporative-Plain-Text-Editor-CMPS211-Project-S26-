@@ -1,6 +1,12 @@
 package com.texteditor.apt;
 
 import java.util.LinkedList;
+
+import com.texteditor.apt.CRDT.Block_CRDT;
+import com.texteditor.apt.CRDT.Block_Node;
+import com.texteditor.apt.CRDT.Char_ID;
+import com.texteditor.apt.CRDT.Char_Node;
+import com.texteditor.apt.CRDT.Identifier;
 public class ServerState {
     LinkedList<ActiveDocument> alldocs= new LinkedList<>();
 

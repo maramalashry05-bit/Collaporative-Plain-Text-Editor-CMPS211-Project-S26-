@@ -1,6 +1,8 @@
 package com.texteditor.apt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.texteditor.apt.CRDT.Block_Operation;
+import com.texteditor.apt.CRDT.Character_Operation;
 
 public class Message_Converter {
      private static final ObjectMapper mapper = new ObjectMapper();
