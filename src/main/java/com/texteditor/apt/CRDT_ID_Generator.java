@@ -4,7 +4,7 @@ public class CRDT_ID_Generator {
 
     // A predefined gap size to use when we run out of numbers.
     // Think of this like base-10 decimals.
-    private final int DEFAULT_MAX = 10; 
+    private final int DEFAULT_MAX = 10; //must be 100 omnia 
 
     // Helper method to safely get a digit from the array, or a default if we are out of bounds
     private int getDigit(Char_ID id, int depth, int defaultDigit) {
