@@ -40,15 +40,33 @@ public class EditorPane extends StackPane {
             "-fx-border-color: transparent; " +
             "-fx-background-color: #1A1A2E;"
         );
-        setupKeyHandlers();
+        //setupKeyHandlers();
 
-        // Step 5: send cursor position to server whenever caret moves
-        textArea.caretPositionProperty().addListener((obs, oldVal, newVal) -> {
-            if (updatingFromCRDT) return;
-            if (wsClient != null) {
-                wsClient.sendCursorUpdate(newVal.intValue(), currentBlockId);
+textArea.textProperty().addListener((obs, oldText, newText) -> {
+        if (!updatingFromCRDT) {
+            // Find what changed
+            if (newText.length() > oldText.length()) {
+                int caret = textArea.getCaretPosition();
+                char lastChar = newText.charAt(Math.max(0, caret - 1));
+                
+                // Update CRDT
+                crdtState.localInsert(caret - 1, lastChar);
+                
+                // Sync with server
+                if (wsClient != null) {
+                    wsClient.sendInsert(caret - 1, lastChar, currentBlockId);
+                }
             }
-        });
+        }
+    });
+        
+        // Step 5: send cursor position to server whenever caret moves
+        // textArea.caretPositionProperty().addListener((obs, oldVal, newVal) -> {
+        //     if (updatingFromCRDT) return;
+        //     if (wsClient != null) {
+        //         wsClient.sendCursorUpdate(newVal.intValue(), currentBlockId);
+        //     }
+        // });
 
         cursorCanvas = new Canvas();
         cursorCanvas.setMouseTransparent(true);
@@ -148,19 +166,25 @@ public class EditorPane extends StackPane {
 });
     }
 
-   private void refreshTextArea(String newText, int newCaret) {
+ private void refreshTextArea(String newText, int newCaret) {
     updatingFromCRDT = true;
-    
-    // 1. Update the text
-    textArea.setText(newText);
-    
-    // 2. Use runLater to ensure the cursor moves AFTER the UI paints the text
+
+    // Use replaceText instead of setText for a smoother update
+    // This tells JavaFX: "Just change the content, don't destroy the box"
+    textArea.replaceText(0, textArea.getLength(), newText);
+
+    // Force the cursor movement into a RunLater to ensure it happens AFTER the render
     javafx.application.Platform.runLater(() -> {
         int clampedCaret = Math.max(0, Math.min(newCaret, newText.length()));
         textArea.positionCaret(clampedCaret);
+        
+        // This is the magic line - make sure the box is ready for the next letter
+        textArea.requestFocus(); 
+        
         updatingFromCRDT = false;
-        paintCursors(); // Redraw those cool remote cursors
+        paintCursors();
     });
+
 }
 
     private void paintCursors() {

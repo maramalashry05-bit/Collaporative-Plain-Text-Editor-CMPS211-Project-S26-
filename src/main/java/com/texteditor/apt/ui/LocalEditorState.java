@@ -27,6 +27,7 @@ public class LocalEditorState {
                 ? visible[caretPosition].getId() : null;
 
         Char_ID newId = idGenerator.generateIdBetween(prevId, nextId, siteId);
+
         characterTree.insert(new Char_Node(newId, character));
 
         return characterTree.getVisibleText();
@@ -67,4 +68,6 @@ public class LocalEditorState {
     public String getSiteId() {
         return siteId;
     }
+
+    
 }
