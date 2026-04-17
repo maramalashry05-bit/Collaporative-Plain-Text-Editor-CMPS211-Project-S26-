@@ -21,8 +21,12 @@ public class Char_Node {
     public Char_ID getId() { return id; }
     public char getValue() { return value; }
     
-    public void markAsDeleted() { this.isDeleted = true; }
-    public boolean isDeleted() { return isDeleted; }
+    public void markAsBold() { this.isBold = true; }
+    public boolean isBold() { return isBold; }
     
-    // Methods for bold/italic toggles would go here..........
-}
+ public void markAsItalic() { this.isItalic = true; }
+    public boolean isItalic() { return isItalic; }
+    
+     public void markAsDeleted() { this.isDeleted = true; }
+    public boolean isDeleted() { return isDeleted; }
+    }
