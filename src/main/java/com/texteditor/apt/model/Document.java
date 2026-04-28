@@ -21,7 +21,7 @@ public class Document {
         // Default constructor needed by JPA
     }
 
-    public Document(String editorCode, String viewerCode, String content) {
+    public Document(String editorCode, String viewerCode, String content) { 
         this.editorCode = editorCode;
         this.viewerCode = viewerCode;
         this.content = content;

@@ -33,9 +33,11 @@ public class EditorWindow {
 
     // Step 3: hold the WebSocket client so we can disconnect on close
     private WebSocketClient wsClient;
+    private final LocalDatabase localDatabase;
 
-    public EditorWindow(Stage stage) {
+    public EditorWindow(Stage stage, LocalDatabase localDatabase) {
         this.stage         = stage;
+        this.localDatabase = localDatabase;
         this.toolbar       = new EditorToolbar();
         this.editorPane    = new EditorPane();
         this.presencePanel = new UserPresencePanel();

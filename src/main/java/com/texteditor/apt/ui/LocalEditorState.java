@@ -20,7 +20,7 @@ public class LocalEditorState {
     public String localInsert(int caretPosition, char character) {
         Char_Node[] visible = characterTree.getVisibleNodes();
 
-        Char_ID prevId = (caretPosition > 0 && caretPosition - 1 < visible.length)
+        Char_ID prevId = (caretPosition > 0 && visible.length > 0 && caretPosition - 1 < visible.length)
                 ? visible[caretPosition - 1].getId() : null;
 
         Char_ID nextId = (caretPosition < visible.length)

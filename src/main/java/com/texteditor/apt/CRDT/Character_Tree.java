@@ -1,5 +1,7 @@
 package com.texteditor.apt.CRDT;
 
+import java.util.LinkedList;
+
 public class Character_Tree {
     private CRDT_Tree_Node root;
 
@@ -106,4 +108,18 @@ private void collectVisible(CRDT_Tree_Node node, Char_Node[] result, int[] index
             current.getCharNode().markAsDeleted();
         }
     }
+
+
+        public LinkedList<Char_Node> getAllNodes() {
+            LinkedList<Char_Node> result = new LinkedList<>();
+            collectAll(root, result);
+            return result;
+        }
+
+        private void collectAll(CRDT_Tree_Node node, LinkedList<Char_Node> result) {
+            if (node == null) return;
+            collectAll(node.getLeft(), result);
+            result.add(node.getCharNode());
+            collectAll(node.getRight(), result);
+        }
 }

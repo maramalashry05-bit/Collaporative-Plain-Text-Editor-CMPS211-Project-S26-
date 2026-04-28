@@ -7,8 +7,10 @@ import com.texteditor.apt.CRDT.Block_Node;
 import com.texteditor.apt.CRDT.Char_ID;
 import com.texteditor.apt.CRDT.Char_Node;
 import com.texteditor.apt.CRDT.Identifier;
+import org.springframework.stereotype.Component;
+@Component
 public class ServerState {
-    LinkedList<ActiveDocument> alldocs= new LinkedList<>();
+    public LinkedList<ActiveDocument> alldocs= new LinkedList<>();
 
     public Block_CRDT FindaDoc(String docid){
         for(int i=0;i<alldocs.size();i++){

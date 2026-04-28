@@ -20,13 +20,24 @@ public class Char_Node {
     // Getters and Setters...
     public Char_ID getId() { return id; }
     public char getValue() { return value; }
+
     
     public void markAsBold() { this.isBold = true; }
     public boolean isBold() { return isBold; }
     
- public void markAsItalic() { this.isItalic = true; }
+    public void markAsItalic() { this.isItalic = true; }
     public boolean isItalic() { return isItalic; }
     
      public void markAsDeleted() { this.isDeleted = true; }
     public boolean isDeleted() { return isDeleted; }
+
+
+    //for serialization
+    public int getPosition() { 
+    return id.getPosition()[0].getDigit(); 
+    }
+
+    public String getUserID() { 
+        return id.getPosition()[0].getSiteId(); 
+    }
     }

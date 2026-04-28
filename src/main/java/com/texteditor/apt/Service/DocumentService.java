@@ -38,4 +38,25 @@ public class DocumentService {
     public Optional<Document> findDocumentByCode(String code) {
         return documentRepository.findByEditorCodeOrViewerCode(code, code);
     }
+
+    //find a doc and update it
+    public Document updateDocumentContent(String docId, String newContent) {
+        try {
+        Long id = Long.parseLong(docId);
+        Optional<Document> doc = documentRepository.findById(id);
+        if (doc.isPresent()) {
+            Document d = doc.get();
+            d.setContent(newContent);
+            return documentRepository.save(d);
+        }
+        throw new RuntimeException("Document not found");
+    } catch (NumberFormatException e) {
+        throw new RuntimeException("Invalid document ID:" +docId);
+    }
+    }
+
+
+    public Optional<Document> findById(Long id) {
+    return documentRepository.findById(id);
+    }
 }
