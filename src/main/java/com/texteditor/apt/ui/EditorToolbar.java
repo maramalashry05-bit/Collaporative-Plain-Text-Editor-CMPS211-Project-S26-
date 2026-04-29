@@ -13,26 +13,43 @@ import javafx.scene.layout.Region;
  * Top toolbar of the editor.
  *
  * Contains:
+ *  - Back button (returns to launcher/join screen)
+ *  - Undo / Redo / Export actions
  *  - Document title (editable)
- *  - Bold / Italic toggle buttons (wired up in Step 2)
+ *  - Bold / Italic toggle buttons
  *  - Share button placeholder (wired to Person 4's code in Step 3)
  *  - Connection status indicator
  */
 public class EditorToolbar extends HBox {
 
     private final TextField titleField;
-    private final Button boldBtn;
-    private final Button italicBtn;
-    private final Button shareBtn;
-    private final Label statusLabel;
+    private final Button    boldBtn;
+    private final Button    italicBtn;
+    private final Button    shareBtn;
+    private final Button    undoBtn;
+    private final Button    redoBtn;
+    private final Button    exportBtn;
+    private final Button    backBtn;
+    private final Label     statusLabel;
 
     public EditorToolbar() {
-        setSpacing(8);
+        setSpacing(6);
         setPadding(new Insets(10, 16, 10, 16));
         setAlignment(Pos.CENTER_LEFT);
         setStyle("-fx-background-color: #13131F; -fx-border-color: #2E2E3E; -fx-border-width: 0 0 1 0;");
 
-        // ── Document title ───────────────────────────────────────────────
+        // ── Back button ───────────────────────────────────────────────────
+        backBtn = makeIconButton("← Back");
+
+        // ── Undo / Redo / Export ──────────────────────────────────────────
+        undoBtn   = makeIconButton("↩");
+        redoBtn   = makeIconButton("↪");
+        exportBtn = makeTextButton("Export");
+
+        Region gapAfterExport = new Region();
+        gapAfterExport.setPrefWidth(12);
+
+        // ── Document title ────────────────────────────────────────────────
         titleField = new TextField("Untitled Document");
         titleField.setStyle(
             "-fx-background-color: transparent; " +
@@ -43,19 +60,21 @@ public class EditorToolbar extends HBox {
             "-fx-pref-width: 200;"
         );
 
-        // ── Spacer ────────────────────────────────────────────────────────
-        Region spacer1 = new Region();
-        HBox.setHgrow(spacer1, Priority.ALWAYS);
+        // ── Push everything after title to the right ──────────────────────
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // ── Formatting buttons ────────────────────────────────────────────
-        boldBtn   = makeToolButton("B", "bold");
-        italicBtn = makeToolButton("I", "italic");
+        // ── Bold / Italic ─────────────────────────────────────────────────
+        boldBtn = makeIconButton("B");
+        boldBtn.setStyle(boldBtn.getStyle() + "-fx-font-weight: bold;");
+        italicBtn = makeIconButton("I");
+        italicBtn.setStyle(italicBtn.getStyle() + "-fx-font-style: italic;");
 
-        // ── Spacer ────────────────────────────────────────────────────────
-        Region spacer2 = new Region();
-        spacer2.setPrefWidth(12);
+        Region gapBeforeShare = new Region();
+        gapBeforeShare.setPrefWidth(8);
 
         // ── Share button ──────────────────────────────────────────────────
+        // Phase 3 hook: shareBtn.setOnAction(e -> Person4AccessAPI.requestShareCodes(...));
         shareBtn = new Button("Share");
         shareBtn.setStyle(
             "-fx-background-color: #4A90E2; " +
@@ -66,14 +85,25 @@ public class EditorToolbar extends HBox {
             "-fx-padding: 6 14 6 14; " +
             "-fx-cursor: hand;"
         );
-        // Phase 3 hook: shareBtn.setOnAction(e -> Person4AccessAPI.requestShareCodes(...));
 
-        // ── Status label ──────────────────────────────────────────────────
+        Region gapBeforeStatus = new Region();
+        gapBeforeStatus.setPrefWidth(10);
+
+        // ── Connection status ─────────────────────────────────────────────
         statusLabel = new Label("⬤ Offline");
         statusLabel.setStyle("-fx-text-fill: #888; -fx-font-size: 11px;");
 
-        getChildren().addAll(titleField, spacer1, boldBtn, italicBtn, spacer2, shareBtn, statusLabel);
+        getChildren().addAll(
+            backBtn, undoBtn, redoBtn, exportBtn, gapAfterExport,
+            titleField,
+            spacer,
+            boldBtn, italicBtn, gapBeforeShare,
+            shareBtn, gapBeforeStatus,
+            statusLabel
+        );
     }
+
+    // ── Public API ────────────────────────────────────────────────────────
 
     /** Updates the connection status badge shown in the toolbar. */
     public void setStatus(boolean connected) {
@@ -86,33 +116,55 @@ public class EditorToolbar extends HBox {
         }
     }
 
-    public String getDocumentTitle() {
-        return titleField.getText();
+    /** Programmatically sets the document title (e.g. when loading from DB). */
+    public void setTitle(String title) {
+        if (title != null && !title.isBlank()) titleField.setText(title);
     }
+
+    public String getDocumentTitle() { return titleField.getText(); }
 
     public Button getBoldBtn()   { return boldBtn;   }
     public Button getItalicBtn() { return italicBtn; }
     public Button getShareBtn()  { return shareBtn;  }
+    public Button getUndoBtn()   { return undoBtn;   }
+    public Button getRedoBtn()   { return redoBtn;   }
+    public Button getExportBtn() { return exportBtn; }
+    public Button getBackBtn()   { return backBtn;   }
 
     // ── Private helpers ───────────────────────────────────────────────────
 
-    private Button makeToolButton(String text, String type) {
-    Button btn = new Button(text);
-    final String baseStyle =
-        "-fx-background-color: #2A2A3E; " +
-        "-fx-text-fill: #CCCCDD; " +
-        "-fx-font-size: 13px; " +
-        "-fx-min-width: 32; " +
-        "-fx-min-height: 28; " +
-        "-fx-background-radius: 5; " +
-        "-fx-cursor: hand;";
+    /** For icon-sized buttons (fixed 32×28): Back, Undo, Redo, Bold, Italic. */
+    private Button makeIconButton(String text) {
+        Button btn = new Button(text);
+        String style =
+            "-fx-background-color: #2A2A3E; " +
+            "-fx-text-fill: #CCCCDD; " +
+            "-fx-font-size: 13px; " +
+            "-fx-min-width: 32; " +
+            "-fx-min-height: 28; " +
+            "-fx-background-radius: 5; " +
+            "-fx-cursor: hand;";
+        btn.setStyle(style);
+        btn.setOnMouseEntered(e -> btn.setStyle(style.replace("#2A2A3E", "#3A3A5E")));
+        btn.setOnMouseExited(e  -> btn.setStyle(style));
+        return btn;
+    }
 
-    final String hoverStyle = baseStyle.replace("#2A2A3E", "#3A3A5E");
-
-    btn.setStyle(baseStyle);
-    btn.setOnMouseEntered(e -> btn.setStyle(hoverStyle));
-    btn.setOnMouseExited(e  -> btn.setStyle(baseStyle));
-
-    return btn;
-} 
+    /** For text-label buttons with padding: Export. */
+    private Button makeTextButton(String text) {
+        Button btn = new Button(text);
+        String style =
+            "-fx-background-color: #2A2A3E; " +
+            "-fx-text-fill: #CCCCDD; " +
+            "-fx-font-size: 12px; " +
+            "-fx-font-weight: bold; " +
+            "-fx-min-height: 28; " +
+            "-fx-background-radius: 5; " +
+            "-fx-padding: 5 12 5 12; " +
+            "-fx-cursor: hand;";
+        btn.setStyle(style);
+        btn.setOnMouseEntered(e -> btn.setStyle(style.replace("#2A2A3E", "#3A3A5E")));
+        btn.setOnMouseExited(e  -> btn.setStyle(style));
+        return btn;
+    }
 }

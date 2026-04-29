@@ -1,33 +1,12 @@
-/* 
 package com.texteditor.apt.ui;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
 
 /**
- * Entry point for the Collaborative Text Editor (Phase 2 - UI Shell).
- * Run this class to launch the editor window.
+ * Entry point for the Collaborative Text Editor.
+ * Launches the initial screen and manages the local database lifecycle.
  */
-/* 
-public class EditorApp extends Application {
-
-    @Override
-    public void start(Stage primaryStage) {
-        EditorWindow window = new EditorWindow(primaryStage);
-        window.show();
-        window.connectToServer("ws://localhost:8080/ws", "doc-001", "Alice", 1); ///when person two connect 
-    }
-
-    public static void main(String[] args) {
-        launch(args);
-    }
-}
-*/
-package com.texteditor.apt.ui;
-
-import javafx.application.Application;
-import javafx.stage.Stage;
-
 public class EditorApp extends Application {
 
     private final LocalDatabase localDatabase = new LocalDatabase();
@@ -37,9 +16,9 @@ public class EditorApp extends Application {
         // Open the local database when the app starts
         localDatabase.connect();
 
-        // Show the join screen instead of hardcoded values
-        JoinScreen joinScreen = new JoinScreen(primaryStage, localDatabase);
-        joinScreen.show();
+        // Show the launcher screen first; it should navigate to JoinScreen
+        LauncherScreen launcher = new LauncherScreen(primaryStage, localDatabase);
+        launcher.show();
     }
 
     @Override
