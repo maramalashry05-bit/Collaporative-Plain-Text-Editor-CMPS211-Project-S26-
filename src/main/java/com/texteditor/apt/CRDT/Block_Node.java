@@ -4,6 +4,9 @@
         private String blockID;
         private String parentBlockID;
         private boolean isDeleted;
+     private boolean isBold;
+     private boolean isItalic;
+    
         private Character_Tree content;
 
 
@@ -20,6 +23,12 @@
         public String getParentBlockID(){
             return parentBlockID;
         }
+           public void markAsBold() { this.isBold = true; }
+            public boolean isBold() { return isBold; }
+    
+    public void markAsItalic() { this.isItalic = true; }
+    public boolean isItalic() { return isItalic; }
+
         public void markAsDeleted() { 
             this.isDeleted = true; 
         }

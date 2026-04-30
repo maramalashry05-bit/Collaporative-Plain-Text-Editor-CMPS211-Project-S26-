@@ -1,4 +1,4 @@
-package com.texteditor.apt.model;
+package com.texteditor.apt.Document;
 
 import jakarta.persistence.*;
 

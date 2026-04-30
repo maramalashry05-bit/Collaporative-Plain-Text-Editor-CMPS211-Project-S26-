@@ -1,8 +1,6 @@
 package com.texteditor.apt.CRDT;
 import java.util.LinkedList;
 
-import com.texteditor.apt.User;
-
 public class Block_Simulation {
 
     // this method is our judge - takes a true/false condition and a test name

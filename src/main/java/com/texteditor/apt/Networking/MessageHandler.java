@@ -1,4 +1,4 @@
-package com.texteditor.apt;
+package com.texteditor.apt.Networking;
 
 public class MessageHandler {
    ServerState Server;

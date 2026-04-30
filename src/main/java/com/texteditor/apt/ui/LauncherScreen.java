@@ -51,85 +51,212 @@ public class LauncherScreen {
         errorLabel.setFont(Font.font("System", 12));
         errorLabel.setVisible(false);
 
-        // ── Card 1: New Doc ───────────────────────────────────────────────
+        // ── NEW: Global Username Field ────────────────────────────────────
+        TextField usernameField = new TextField();
+        usernameField.setPromptText("Enter your Username...");
+        usernameField.setStyle(
+            "-fx-background-color: #2A2A4E; " +
+            "-fx-text-fill: white; " +
+            "-fx-prompt-text-fill: #888899; " +
+            "-fx-font-size: 14px; " +
+            "-fx-background-radius: 6; " +
+            "-fx-padding: 10 15 10 15; " +
+            "-fx-max-width: 250;"
+        );
+        VBox userBox = new VBox(10, usernameField);
+        userBox.setAlignment(Pos.CENTER);
+// ── Card 1: New Doc ───────────────────────────────────────────────
         VBox newDocCard = makeCard();
         Label newDocIcon = new Label("📄");
         newDocIcon.setFont(Font.font(40));
         Button newDocBtn = makeCardButton("New Doc.");
+        
         newDocBtn.setOnAction(e -> {
-            // Generate a unique ID for this new document
-            String newDocId = UUID.randomUUID().toString();
+    String username = usernameField.getText().trim();
+    if (username.isEmpty()) {
+        showError(errorLabel, "⚠ Please enter your username first.");
+        return;
+    }
 
-            EditorWindow editor = new EditorWindow(stage, localDatabase);
-            editor.show();
-            editor.initDocument(newDocId, "User1");
-        });
+    newDocBtn.setText("Creating...");
+    newDocBtn.setDisable(true);
+
+    new Thread(() -> {
+        try {
+            java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
+            java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                    .uri(java.net.URI.create("http://localhost:8080/api/documents"))
+                    .POST(java.net.http.HttpRequest.BodyPublishers.noBody())
+                    .build();
+
+            java.net.http.HttpResponse<String> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+
+            javafx.application.Platform.runLater(() -> {
+                newDocBtn.setText("New Doc.");
+                newDocBtn.setDisable(false);
+
+                if (response.statusCode() == 200) {
+                    try {
+                        // SAFE PARSING WITH MAPPER
+                        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                        com.fasterxml.jackson.databind.JsonNode rootNode = mapper.readTree(response.body());
+
+                       String realDocId = rootNode.get("documentId").asText();
+                        String editorCode = rootNode.get("editorCode").asText();
+                        String viewerCode = rootNode.get("viewerCode").asText();
+
+                        // ── THE PRINT STATEMENTS YOU WANTED ──────────────────
+                        System.out.println("\n=================================================");
+                        System.out.println(" NEW DOCUMENT CREATED!");
+                        System.out.println(" Room ID (for WS): " + realDocId);
+                        System.out.println(" Editor code: " + editorCode);
+                        System.out.println(" Viewer code: " + viewerCode);
+                        System.out.println("=================================================\n");
+                        EditorWindow editor = new EditorWindow(stage, localDatabase);
+                        editor.applyPermissions("EDITOR");
+                        editor.initDocument(realDocId, username);
+
+                        int colorSlot = Math.abs(username.hashCode()) % 4;
+                        // IMPORTANT: Connect to realDocId (the room), not the code
+                        editor.connectToServer("ws://localhost:8080/ws", realDocId, username, colorSlot);
+
+                        editor.show();
+                    } catch (Exception ex) {
+                        showError(errorLabel, "⚠ JSON Error. Check console.");
+                        ex.printStackTrace();
+                    }
+                } else {
+                    showError(errorLabel, "⚠ Failed to create document.");
+                }
+            });
+        } catch (Exception ex) {
+            javafx.application.Platform.runLater(() -> {
+                newDocBtn.setText("New Doc.");
+                newDocBtn.setDisable(false);
+                showError(errorLabel, "⚠ Server connection failed.");
+            });
+        }
+    }).start();
+});
         newDocCard.getChildren().addAll(newDocIcon, newDocBtn);
-
         // ── Card 2: Browse ────────────────────────────────────────────────
         VBox browseCard = makeCard();
         Label browseIcon = new Label("📋");
         browseIcon.setFont(Font.font(40));
         Button browseBtn = makeCardButton("Browse..");
         browseBtn.setOnAction(e -> {
+            String username = usernameField.getText().trim();
+            if (username.isEmpty()) {
+                showError(errorLabel, "⚠ Please enter your username first.");
+                return;
+            }
+
             FileChooser chooser = new FileChooser();
             chooser.setTitle("Open Text File");
-            chooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Text Files", "*.txt")
-            );
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.txt"));
             File file = chooser.showOpenDialog(stage);
+            
             if (file != null) {
                 try {
                     String content = Files.readString(file.toPath());
-
-                    // Use file name as document ID so same file loads same doc
                     String fileDocId = "file-" + file.getName();
 
                     EditorWindow editor = new EditorWindow(stage, localDatabase);
                     editor.show();
-                    editor.initDocument(fileDocId, "User1");
+                    editor.initDocument(fileDocId, username); // Passes actual username
 
-                    // Set the imported text and title
+                    // Note: If you are using Option 2, remember to update this 
+                    // to load via CRDT instead of getTextArea().setText()
                     editor.getEditorPane().getTextArea().setText(content);
                     editor.getToolbar().setTitle(file.getName());
 
                 } catch (Exception ex) {
-                    errorLabel.setText("Could not read file: " + ex.getMessage());
-                    errorLabel.setVisible(true);
+                    showError(errorLabel, "Could not read file: " + ex.getMessage());
                 }
             }
         });
         browseCard.getChildren().addAll(browseIcon, browseBtn);
 
-        // ── Card 3: Join Session ──────────────────────────────────────────
+        // ── Card 3: Join Session (With Member 3 Logic Included) ───────────
         VBox joinCard = makeCard();
         Label joinIcon = new Label("👥");
         joinIcon.setFont(Font.font(40));
         TextField codeField = new TextField();
         codeField.setPromptText("Session Code");
         codeField.setStyle(
-            "-fx-background-color: #F5F5F5; " +
-            "-fx-text-fill: #111; " +
-            "-fx-font-size: 13px; " +
-            "-fx-background-radius: 6; " +
-            "-fx-padding: 8 12 8 12; " +
-            "-fx-pref-width: 150;"
+            "-fx-background-color: #F5F5F5; -fx-text-fill: #111; " +
+            "-fx-font-size: 13px; -fx-background-radius: 6; " +
+            "-fx-padding: 8 12 8 12; -fx-pref-width: 150;"
         );
         Button joinBtn = makeCardButton("Join");
-        joinBtn.setOnAction(e -> {
-            String code = codeField.getText().trim();
-            if (code.isEmpty()) {
-                errorLabel.setText("⚠ Please enter a session code.");
-                errorLabel.setVisible(true);
-            } else {
-                errorLabel.setVisible(false);
-                EditorWindow editor = new EditorWindow(stage, localDatabase);
-                editor.show();
-                // Use the session code as the document ID
-                editor.initDocument(code, "Alice");
-                editor.connectToServer("ws://localhost:8080/ws", code, "Alice", 1);
-            }
-        });
+        
+      joinBtn.setOnAction(e -> {
+    String username = usernameField.getText().trim();
+    String code = codeField.getText().trim();
+
+    if (username.isEmpty() || code.isEmpty()) {
+        showError(errorLabel, "⚠ Username and Code required.");
+        return;
+    }
+
+    joinBtn.setText("Joining...");
+    joinBtn.setDisable(true);
+
+    new Thread(() -> {
+        try {
+            java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
+            String jsonBody = "{\"code\":\"" + code + "\"}";
+            java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                    .uri(java.net.URI.create("http://localhost:8080/api/documents/join"))
+                    .header("Content-Type", "application/json")
+                    .POST(java.net.http.HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+
+            java.net.http.HttpResponse<String> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+
+            javafx.application.Platform.runLater(() -> {
+                joinBtn.setText("Join");
+                joinBtn.setDisable(false);
+
+                if (response.statusCode() == 200) {
+                    try {
+                        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                        com.fasterxml.jackson.databind.JsonNode rootNode = mapper.readTree(response.body());
+
+                        String docId = rootNode.get("documentId").asText();
+                        String role = rootNode.get("role").asText();
+                        String content = rootNode.path("content").asText(""); // THE SYNC DATA
+
+                        EditorWindow editor = new EditorWindow(stage, localDatabase);
+                        editor.applyPermissions(role);
+                        
+                        // FIX: SET THE CONTENT BEFORE CONNECTING
+                        editor.getEditorPane().getTextArea().setText(content);
+                        
+                        editor.initDocument(docId, username);
+
+                        int colorSlot = Math.abs(username.hashCode()) % 4;
+                        editor.connectToServer("ws://localhost:8080/ws", docId, username, colorSlot);
+
+                        editor.show();
+                    } catch (Exception ex) {
+                        showError(errorLabel, "⚠ JSON Error. Check console.");
+                        ex.printStackTrace();
+                    }
+                } else {
+                    showError(errorLabel, "⚠ Invalid Access Code.");
+                }
+            });
+        } catch (Exception ex) {
+            javafx.application.Platform.runLater(() -> {
+                joinBtn.setText("Join");
+                joinBtn.setDisable(false);
+                showError(errorLabel, "⚠ Server connection failed.");
+            });
+        }
+    }).start();
+});
+        
         codeField.setOnAction(e -> joinBtn.fire());
         joinCard.getChildren().addAll(joinIcon, codeField, joinBtn);
 
@@ -139,23 +266,28 @@ public class LauncherScreen {
         cardsRow.getChildren().addAll(newDocCard, browseCard, joinCard);
 
         // ── Center layout ─────────────────────────────────────────────────
-        VBox center = new VBox(40);
+        VBox center = new VBox(30);
         center.setAlignment(Pos.CENTER);
-        center.setPadding(new Insets(60));
-        center.getChildren().addAll(titleBox, cardsRow, errorLabel);
+        center.setPadding(new Insets(40));
+        center.getChildren().addAll(titleBox, userBox, cardsRow, errorLabel);
 
         root.setCenter(center);
 
         // ── Scene ─────────────────────────────────────────────────────────
-        Scene scene = new Scene(root, 700, 420);
+        Scene scene = new Scene(root, 700, 480); // Made window slightly taller to fit the new text field
         stage.setTitle("CollabEdit — Welcome");
         stage.setScene(scene);
         stage.setMinWidth(520);
-        stage.setMinHeight(340);
+        stage.setMinHeight(400);
         stage.show();
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────
+
+    private void showError(Label errorLabel, String message) {
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
+    }
 
     private VBox makeCard() {
         VBox card = new VBox(14);

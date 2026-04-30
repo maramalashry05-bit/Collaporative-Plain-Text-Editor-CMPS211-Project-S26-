@@ -1,4 +1,4 @@
-package com.texteditor.apt;
+package com.texteditor.apt.Networking;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

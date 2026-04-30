@@ -1,7 +1,8 @@
-package com.texteditor.apt;
+package com.texteditor.apt.Networking;
 
 import com.texteditor.apt.CRDT.Block_Operation;
 import com.texteditor.apt.CRDT.Character_Operation;
+import com.texteditor.apt.CRDT.User;
 
 public class TestConverter {
     public static void main(String[] args) {

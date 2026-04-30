@@ -1,7 +1,5 @@
-package com.texteditor.apt.Service;
+package com.texteditor.apt.Document;
 
-import com.texteditor.apt.model.Document;
-import com.texteditor.apt.repository.DocumentRepository;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;

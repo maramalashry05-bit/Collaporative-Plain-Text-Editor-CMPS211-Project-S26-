@@ -1,7 +1,5 @@
-package com.texteditor.apt.Controller;
+package com.texteditor.apt.Document;
 
-import com.texteditor.apt.model.Document;
-import com.texteditor.apt.Service.DocumentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +16,7 @@ public class DocumentController {
     }
 
     // 1. DTO (Data Transfer Objects) to format the JSON cleanly
-    public record CreateDocResponse(String editorCode, String viewerCode) {}
+    public record CreateDocResponse(Long documentId,String editorCode, String viewerCode) {}
     public record JoinRequest(String code) {}
     public record JoinResponse(Long documentId, String role, String content) {}
 
@@ -27,8 +25,10 @@ public class DocumentController {
     public ResponseEntity<CreateDocResponse> createDocument() {
         Document newDoc = documentService.createNewDocument();
         return ResponseEntity.ok(new CreateDocResponse(
-                newDoc.getEditorCode(), 
-                newDoc.getViewerCode()
+                
+            newDoc.getId(),
+            newDoc.getEditorCode(), 
+            newDoc.getViewerCode()
         ));
     }
 

@@ -1,7 +1,5 @@
 package com.texteditor.apt.CRDT;
 
-import com.texteditor.apt.User;
-
 public class CombinedSimulation {
     public static void main(String[] args) {
         User user1 = new User("User1");

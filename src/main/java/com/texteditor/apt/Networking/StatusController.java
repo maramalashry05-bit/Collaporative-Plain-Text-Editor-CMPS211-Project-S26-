@@ -1,4 +1,4 @@
-package com.texteditor.apt;
+package com.texteditor.apt.Networking;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.texteditor.apt;
+package com.texteditor.apt.Networking;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;

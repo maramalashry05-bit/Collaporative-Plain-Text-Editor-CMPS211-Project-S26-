@@ -1,4 +1,4 @@
-package com.texteditor.apt;
+package com.texteditor.apt.Networking;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.texteditor.apt.CRDT.Block_Operation;

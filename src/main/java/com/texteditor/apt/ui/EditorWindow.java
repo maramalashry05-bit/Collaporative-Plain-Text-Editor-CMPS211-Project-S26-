@@ -8,7 +8,6 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -16,6 +15,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Optional;
+
+import com.texteditor.apt.Networking.WebSocketClient;
 
 public class EditorWindow {
 
@@ -44,11 +45,25 @@ public class EditorWindow {
     public void initDocument(String docId, String userId) {
         this.docId  = docId;
         this.userId = userId;
+// Tell the EditorPane what your name is
+        editorPane.setMyUsername(userId);
 
+        // Generate the color slot based on your name (modulo 4 because you have 4 colors)
+        int myColorSlot = Math.abs(userId.hashCode()) % 4;
+        
+        // Use YOUR exact method!
+        presencePanel.addUser(userId, myColorSlot);
         if (localDatabase.documentExists(docId)) {
             String savedText = localDatabase.loadDocumentText(docId);
             String title     = localDatabase.loadDocumentTitle(docId);
             toolbar.setTitle(title);
+            
+            // 1. Populate the CRDT in the background first!
+            for (int i = 0; i < savedText.length(); i++) {
+                editorPane.getCrdtState().localInsert(i, savedText.charAt(i));
+            }
+            
+            // 2. Then show it on the screen
             editorPane.setTextSilently(savedText);
             System.out.println("[EditorWindow] Document loaded from DB: " + docId);
         } else {
@@ -68,6 +83,47 @@ public class EditorWindow {
             }
         });
     }
+
+// ──Permission Handling ─────────────────────────────
+    /**
+     * Locks or unlocks the UI based on the user's role from the database.
+     * Call this right after the user successfully joins the document.
+     */
+    public void applyPermissions(String role) {
+        if ("VIEWER".equalsIgnoreCase(role)) {
+            System.out.println("[EditorWindow] Applying VIEWER permissions. Locking UI.");
+            
+            // 1. Lock the text area so they cannot type
+            editorPane.getTextArea().setEditable(false);
+            
+            // 2. Disable editing tools in the toolbar
+            toolbar.getUndoBtn().setDisable(true);
+            toolbar.getRedoBtn().setDisable(true);
+            toolbar.getBoldBtn().setDisable(true);
+            toolbar.getItalicBtn().setDisable(true);
+            toolbar.getImportItem().setDisable(true); // Viewers shouldn't import
+            toolbar.getDeleteItem().setDisable(true); // Viewers shouldn't delete
+            
+            // 3. Update the title so they know they are in read-only mode
+            stage.setTitle(toolbar.getDocumentTitle() + " (Read-Only Mode)");
+            
+        } else if ("EDITOR".equalsIgnoreCase(role)) {
+            System.out.println("[EditorWindow] Applying EDITOR permissions. Unlocking UI.");
+            
+            // 1. Unlock everything
+            editorPane.getTextArea().setEditable(true);
+            
+            toolbar.getUndoBtn().setDisable(false);
+            toolbar.getRedoBtn().setDisable(false);
+            toolbar.getBoldBtn().setDisable(false);
+            toolbar.getItalicBtn().setDisable(false);
+            toolbar.getImportItem().setDisable(false);
+            toolbar.getDeleteItem().setDisable(false);
+            
+            stage.setTitle(toolbar.getDocumentTitle() + " (Editor Mode)");
+        }
+    }
+
 
     public void show() {
         stage.show();
@@ -285,4 +341,8 @@ public class EditorWindow {
     public UserPresencePanel getPresencePanel() { return presencePanel; }
     public WebSocketClient   getWsClient()      { return wsClient;      }
     public String            getDocId()         { return docId;         }
+
+
+
+    
 }

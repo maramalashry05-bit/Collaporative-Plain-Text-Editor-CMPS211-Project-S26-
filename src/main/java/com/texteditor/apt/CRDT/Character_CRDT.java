@@ -1,8 +1,4 @@
-package com;
-
-import com.texteditor.apt.CRDT.Char_ID;
-import com.texteditor.apt.CRDT.Char_Node;
-import com.texteditor.apt.CRDT.Character_Tree;
+package com.texteditor.apt.CRDT;
 
 public class Character_CRDT {
     private Character_Tree tree;

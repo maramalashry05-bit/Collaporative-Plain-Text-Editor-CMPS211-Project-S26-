@@ -1,10 +1,7 @@
-package com.texteditor.apt;
+package com.texteditor.apt.CRDT;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.texteditor.apt.CRDT.Block_Operation;
-import com.texteditor.apt.CRDT.Character_Operation;
 
 public class User{
     public String userID;

@@ -1,7 +1,5 @@
 package com.texteditor.apt.CRDT;
 
-import com.texteditor.apt.User;
-
 public class Character_Simulation {
 
     private static void check(boolean condition, String testName) {
