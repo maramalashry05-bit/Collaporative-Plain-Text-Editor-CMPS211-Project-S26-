@@ -17,6 +17,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.util.UUID;
 
 public class LauncherScreen {
 
@@ -56,8 +57,12 @@ public class LauncherScreen {
         newDocIcon.setFont(Font.font(40));
         Button newDocBtn = makeCardButton("New Doc.");
         newDocBtn.setOnAction(e -> {
+            // Generate a unique ID for this new document
+            String newDocId = UUID.randomUUID().toString();
+
             EditorWindow editor = new EditorWindow(stage, localDatabase);
             editor.show();
+            editor.initDocument(newDocId, "User1");
         });
         newDocCard.getChildren().addAll(newDocIcon, newDocBtn);
 
@@ -76,10 +81,18 @@ public class LauncherScreen {
             if (file != null) {
                 try {
                     String content = Files.readString(file.toPath());
+
+                    // Use file name as document ID so same file loads same doc
+                    String fileDocId = "file-" + file.getName();
+
                     EditorWindow editor = new EditorWindow(stage, localDatabase);
+                    editor.show();
+                    editor.initDocument(fileDocId, "User1");
+
+                    // Set the imported text and title
                     editor.getEditorPane().getTextArea().setText(content);
                     editor.getToolbar().setTitle(file.getName());
-                    editor.show();
+
                 } catch (Exception ex) {
                     errorLabel.setText("Could not read file: " + ex.getMessage());
                     errorLabel.setVisible(true);
@@ -111,8 +124,10 @@ public class LauncherScreen {
             } else {
                 errorLabel.setVisible(false);
                 EditorWindow editor = new EditorWindow(stage, localDatabase);
-                editor.connectToServer("ws://localhost:8080/ws", code, "Alice", 1);
                 editor.show();
+                // Use the session code as the document ID
+                editor.initDocument(code, "Alice");
+                editor.connectToServer("ws://localhost:8080/ws", code, "Alice", 1);
             }
         });
         codeField.setOnAction(e -> joinBtn.fire());

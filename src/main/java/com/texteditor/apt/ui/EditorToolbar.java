@@ -3,34 +3,32 @@ package com.texteditor.apt.ui;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 
-/**
- * Top toolbar of the editor.
- *
- * Contains:
- *  - Back button (returns to launcher/join screen)
- *  - Undo / Redo / Export actions
- *  - Document title (editable)
- *  - Bold / Italic toggle buttons
- *  - Share button placeholder (wired to Person 4's code in Step 3)
- *  - Connection status indicator
- */
+
 public class EditorToolbar extends HBox {
 
-    private final TextField titleField;
-    private final Button    boldBtn;
-    private final Button    italicBtn;
-    private final Button    shareBtn;
-    private final Button    undoBtn;
-    private final Button    redoBtn;
-    private final Button    exportBtn;
-    private final Button    backBtn;
-    private final Label     statusLabel;
+    private final TextField  titleField;
+    private final Button     boldBtn;
+    private final Button     italicBtn;
+    private final Button     shareBtn;
+    private final Button     undoBtn;
+    private final Button     redoBtn;
+    private final Button     backBtn;
+    private final Label      statusLabel;
+
+    // ── File menu ─────────────────────────────────────────────────────────
+    private final Button      fileMenuBtn;
+    private final ContextMenu fileMenu;
+    private final MenuItem    importItem;
+    private final MenuItem    exportItem;
+    private final MenuItem    deleteItem;
 
     public EditorToolbar() {
         setSpacing(6);
@@ -38,18 +36,34 @@ public class EditorToolbar extends HBox {
         setAlignment(Pos.CENTER_LEFT);
         setStyle("-fx-background-color: #13131F; -fx-border-color: #2E2E3E; -fx-border-width: 0 0 1 0;");
 
-        // ── Back button ───────────────────────────────────────────────────
         backBtn = makeIconButton("← Back");
 
-        // ── Undo / Redo / Export ──────────────────────────────────────────
-        undoBtn   = makeIconButton("↩");
-        redoBtn   = makeIconButton("↪");
-        exportBtn = makeTextButton("Export");
+        fileMenuBtn = makeTextButton("File ▾");
 
-        Region gapAfterExport = new Region();
-        gapAfterExport.setPrefWidth(12);
+        importItem = new MenuItem("Import");
+        exportItem = new MenuItem("Export");
+        deleteItem = new MenuItem("Delete");
+        deleteItem.setStyle("-fx-text-fill: #E24A4A; -fx-font-size: 13px;"); // red color
 
-        // ── Document title ────────────────────────────────────────────────
+        fileMenu = new ContextMenu(importItem, exportItem, deleteItem);
+        fileMenu.setStyle(
+            "-fx-background-color: #1E1E2E; " +
+            "-fx-border-color: #3E3E5E; " +
+            "-fx-border-width: 1;"
+        );
+
+        fileMenuBtn.setOnAction(e ->
+            fileMenu.show(fileMenuBtn,
+                fileMenuBtn.localToScreen(0, fileMenuBtn.getHeight()).getX(),
+                fileMenuBtn.localToScreen(0, fileMenuBtn.getHeight()).getY())
+        );
+
+        undoBtn = makeIconButton("↩");
+        redoBtn = makeIconButton("↪");
+
+        Region gapAfterRedo = new Region();
+        gapAfterRedo.setPrefWidth(12);
+
         titleField = new TextField("Untitled Document");
         titleField.setStyle(
             "-fx-background-color: transparent; " +
@@ -60,11 +74,9 @@ public class EditorToolbar extends HBox {
             "-fx-pref-width: 200;"
         );
 
-        // ── Push everything after title to the right ──────────────────────
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // ── Bold / Italic ─────────────────────────────────────────────────
         boldBtn = makeIconButton("B");
         boldBtn.setStyle(boldBtn.getStyle() + "-fx-font-weight: bold;");
         italicBtn = makeIconButton("I");
@@ -73,8 +85,6 @@ public class EditorToolbar extends HBox {
         Region gapBeforeShare = new Region();
         gapBeforeShare.setPrefWidth(8);
 
-        // ── Share button ──────────────────────────────────────────────────
-        // Phase 3 hook: shareBtn.setOnAction(e -> Person4AccessAPI.requestShareCodes(...));
         shareBtn = new Button("Share");
         shareBtn.setStyle(
             "-fx-background-color: #4A90E2; " +
@@ -89,12 +99,11 @@ public class EditorToolbar extends HBox {
         Region gapBeforeStatus = new Region();
         gapBeforeStatus.setPrefWidth(10);
 
-        // ── Connection status ─────────────────────────────────────────────
         statusLabel = new Label("⬤ Offline");
         statusLabel.setStyle("-fx-text-fill: #888; -fx-font-size: 11px;");
 
         getChildren().addAll(
-            backBtn, undoBtn, redoBtn, exportBtn, gapAfterExport,
+            backBtn, fileMenuBtn, undoBtn, redoBtn, gapAfterRedo,
             titleField,
             spacer,
             boldBtn, italicBtn, gapBeforeShare,
@@ -103,9 +112,6 @@ public class EditorToolbar extends HBox {
         );
     }
 
-    // ── Public API ────────────────────────────────────────────────────────
-
-    /** Updates the connection status badge shown in the toolbar. */
     public void setStatus(boolean connected) {
         if (connected) {
             statusLabel.setText("⬤ Connected");
@@ -116,24 +122,25 @@ public class EditorToolbar extends HBox {
         }
     }
 
-    /** Programmatically sets the document title (e.g. when loading from DB). */
     public void setTitle(String title) {
         if (title != null && !title.isBlank()) titleField.setText(title);
     }
 
-    public String getDocumentTitle() { return titleField.getText(); }
+    public String    getDocumentTitle() { return titleField.getText(); }
+    public TextField getTitleField()    { return titleField; }
 
-    public Button getBoldBtn()   { return boldBtn;   }
-    public Button getItalicBtn() { return italicBtn; }
-    public Button getShareBtn()  { return shareBtn;  }
-    public Button getUndoBtn()   { return undoBtn;   }
-    public Button getRedoBtn()   { return redoBtn;   }
-    public Button getExportBtn() { return exportBtn; }
-    public Button getBackBtn()   { return backBtn;   }
+    public Button   getBoldBtn()    { return boldBtn;    }
+    public Button   getItalicBtn()  { return italicBtn;  }
+    public Button   getShareBtn()   { return shareBtn;   }
+    public Button   getUndoBtn()    { return undoBtn;    }
+    public Button   getRedoBtn()    { return redoBtn;    }
+    public Button   getBackBtn()    { return backBtn;    }
+    public Button   getFileMenuBtn(){ return fileMenuBtn; }
 
-    // ── Private helpers ───────────────────────────────────────────────────
+    public MenuItem getImportItem() { return importItem; }
+    public MenuItem getExportItem() { return exportItem; }
+    public MenuItem getDeleteItem() { return deleteItem; }
 
-    /** For icon-sized buttons (fixed 32×28): Back, Undo, Redo, Bold, Italic. */
     private Button makeIconButton(String text) {
         Button btn = new Button(text);
         String style =
@@ -146,11 +153,10 @@ public class EditorToolbar extends HBox {
             "-fx-cursor: hand;";
         btn.setStyle(style);
         btn.setOnMouseEntered(e -> btn.setStyle(style.replace("#2A2A3E", "#3A3A5E")));
-        btn.setOnMouseExited(e  -> btn.setStyle(style));
+        btn.setOnMouseExited (e -> btn.setStyle(style));
         return btn;
     }
 
-    /** For text-label buttons with padding: Export. */
     private Button makeTextButton(String text) {
         Button btn = new Button(text);
         String style =
@@ -164,7 +170,7 @@ public class EditorToolbar extends HBox {
             "-fx-cursor: hand;";
         btn.setStyle(style);
         btn.setOnMouseEntered(e -> btn.setStyle(style.replace("#2A2A3E", "#3A3A5E")));
-        btn.setOnMouseExited(e  -> btn.setStyle(style));
+        btn.setOnMouseExited (e -> btn.setStyle(style));
         return btn;
     }
 }

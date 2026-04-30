@@ -50,7 +50,7 @@ textArea.textProperty().addListener((obs, oldText, newText) -> {
                 char lastChar = newText.charAt(Math.max(0, caret - 1));
                 
                 // Update CRDT
-                crdtState.localInsert(caret - 1, lastChar);
+                crdtState.localInsert(Math.max(0, caret - 1), lastChar);
                 
                 // Sync with server
                 if (wsClient != null) {
@@ -79,6 +79,11 @@ textArea.textProperty().addListener((obs, oldText, newText) -> {
     }
 
     public TextArea getTextArea() { return textArea; }
+    public void setTextSilently(String text) {
+    updatingFromCRDT = true;
+    textArea.setText(text);
+    updatingFromCRDT = false;
+}
     public LocalEditorState getCrdtState() { return crdtState; }
 
     public void setWebSocketClient(WebSocketClient client, String blockId) {

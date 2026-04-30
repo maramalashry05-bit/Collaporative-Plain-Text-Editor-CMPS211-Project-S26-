@@ -18,6 +18,7 @@ public class LocalEditorState {
     }
 
     public String localInsert(int caretPosition, char character) {
+        if (caretPosition < 0) caretPosition = 0; 
         Char_Node[] visible = characterTree.getVisibleNodes();
 
         Char_ID prevId = (caretPosition > 0 && visible.length > 0 && caretPosition - 1 < visible.length)
@@ -68,6 +69,13 @@ public class LocalEditorState {
     public String getSiteId() {
         return siteId;
     }
+    public void clear() {
+    characterTree.getAllNodes().forEach(node -> {
+        if (!node.isDeleted()) {
+            characterTree.delete(node.getId());
+        }
+    });
+}
 
     
 }
