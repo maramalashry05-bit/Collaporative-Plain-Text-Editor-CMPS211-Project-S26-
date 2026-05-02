@@ -1,6 +1,6 @@
 #FileLock
-#Fri May 01 01:43:11 EEST 2026
-hostName=maroma.tail230a14.ts.net.
-id=19de08f6bb370d2abdb22b3074d88cd504978c6d2f6
+#Sun May 03 00:47:00 EEST 2026
+hostName=DESKTOP-1PB15S3
+id=19deaa8b6a58a382df081c9de4959c8f617e502c52a
 method=file
-server=100.113.0.46\:62318
+server=192.168.1.2\:54713

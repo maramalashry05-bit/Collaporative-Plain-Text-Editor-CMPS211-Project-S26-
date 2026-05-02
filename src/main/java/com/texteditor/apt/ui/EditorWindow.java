@@ -1,13 +1,5 @@
 package com.texteditor.apt.ui;
 
-import javafx.geometry.Insets;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
-import javafx.scene.layout.BorderPane;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -17,6 +9,15 @@ import java.io.IOException;
 import java.util.Optional;
 
 import com.texteditor.apt.Networking.WebSocketClient;
+
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
+import javafx.scene.layout.BorderPane;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 public class EditorWindow {
 
@@ -318,6 +319,7 @@ public class EditorWindow {
                                 String userId, int colorSlot) {
         wsClient = new WebSocketClient(editorPane, presencePanel, toolbar);
         wsClient.connect(serverUrl, docId, userId, colorSlot);
+        editorPane.setWebSocketClient(wsClient, "default-block");
     }
 
     public void disconnect() {

@@ -1,5 +1,10 @@
 package com.texteditor.apt.ui;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import com.texteditor.apt.Networking.WebSocketClient;
+
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.TextArea;
@@ -7,13 +12,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import com.texteditor.apt.Networking.WebSocketClient;
 
 public class EditorPane extends StackPane {
-    
     private final TextArea textArea;
     private final Canvas cursorCanvas;
     private final LocalEditorState crdtState;
@@ -47,23 +47,28 @@ public class EditorPane extends StackPane {
         );
         //setupKeyHandlers();
 
-        textArea.textProperty().addListener((obs, oldText, newText) -> {
-            if (!updatingFromCRDT) {
-                // Find what changed
-                if (newText.length() > oldText.length()) {
-                    int caret = textArea.getCaretPosition();
-                    char lastChar = newText.charAt(Math.max(0, caret - 1));
-                    
-                    // Update CRDT
-                    crdtState.localInsert(Math.max(0, caret - 1), lastChar);
-                    
-                    // Sync with server
-                    if (wsClient != null) {
-                        wsClient.sendInsert(caret - 1, lastChar, currentBlockId);
-                    }
-                }
-            }
-        });
+      textArea.textProperty().addListener((obs, oldText, newText) -> {
+    if (!updatingFromCRDT) {
+        if (newText.length() > oldText.length()) {
+    int caret = textArea.getCaretPosition();
+    char lastChar = newText.charAt(Math.max(0, caret - 1));
+    new Thread(() -> {
+        crdtState.localInsert(Math.max(0, caret - 1), lastChar);
+        if (wsClient != null) {
+            wsClient.sendInsert(caret - 1, lastChar, currentBlockId);
+        }
+    }).start();
+} else if (newText.length() < oldText.length()) {
+    int caret = textArea.getCaretPosition();
+    new Thread(() -> {
+        crdtState.localDelete(caret + 1);
+        if (wsClient != null) {
+            wsClient.sendDelete(caret, currentBlockId);
+        }
+    }).start();
+}
+    }
+});
         
         // --- NEW: Make sure your name tag moves when you click or use arrow keys ---
         textArea.caretPositionProperty().addListener((obs, oldVal, newVal) -> {
@@ -240,32 +245,13 @@ public class EditorPane extends StackPane {
  * This is called when a user first joins the document room.
  */
 public void initializeContent(String fullText) {
-    // 1. Use your existing flag to silence the text listener
-    this.updatingFromCRDT = true;
-
+    updatingFromCRDT = true;
     try {
-        // 2. Clear and set the visual text
+        if (fullText == null || fullText.isBlank()) return;
         textArea.clear();
         textArea.setText(fullText);
-
-        // 3. Reset the local CRDT "Brain"
-        // Check your LocalEditorState class for a method to clear data
-        crdtState.clear(); 
-
-        // 4. Re-populate the local CRDT based on the synced text
-        for (int i = 0; i < fullText.length(); i++) {
-            char c = fullText.charAt(i);
-            // This updates the local structure WITHOUT calling wsClient.sendInsert
-            crdtState.localInsert(i, c); 
-        }
-
-        System.out.println("[EditorPane] Content initialized. Length: " + fullText.length());
-
     } finally {
-        // 5. Re-enable listeners so the user can start typing
-        this.updatingFromCRDT = false;
-        
-        // Update the cursor layer
+        updatingFromCRDT = false;
         javafx.application.Platform.runLater(this::paintCursors);
     }
 }
