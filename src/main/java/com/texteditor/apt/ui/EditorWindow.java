@@ -21,6 +21,9 @@ import javafx.stage.Stage;
 
 public class EditorWindow {
 
+    private java.util.Timer saveDebounceTimer = new java.util.Timer(true);
+    private java.util.TimerTask pendingSaveTask = null;
+
     private final Stage             stage;
     private final EditorToolbar     toolbar;
     private final EditorPane        editorPane;
@@ -71,9 +74,13 @@ public class EditorWindow {
             System.out.println("[EditorWindow] New document created: " + docId);
         }
 
-        // Save to DB on every keystroke
+        // Save to DB with debounce (1 second after stopping)
         editorPane.getTextArea().textProperty().addListener((obs, oldText, newText) -> {
-            saveCurrentDocument();
+             if (pendingSaveTask != null) pendingSaveTask.cancel();
+            pendingSaveTask = new java.util.TimerTask() {
+                @Override public void run() { saveCurrentDocument(); }
+            };
+            saveDebounceTimer.schedule(pendingSaveTask, 1000);
         });
 
         // ── RENAME: save to DB when user finishes editing the title ───────
