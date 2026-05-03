@@ -65,6 +65,13 @@ public class EditorController {
             NetworkMessage notice = new NetworkMessage("USER_JOINED", msg.userID, msg.timestamp, docId, null, 0, '\0');
             messagingTemplate.convertAndSend("/topic/doc/" + docId, notice);
 
+            for (String existingUser : roomManager.getUsers(docId)) {
+                if (!existingUser.equals(msg.userID)) {
+                    NetworkMessage existing = new NetworkMessage("USER_JOINED", existingUser, 0, docId, null, 0, '\0');
+                    messagingTemplate.convertAndSend("/topic/doc/" + docId + "/presence/" + msg.userID, existing);
+                }
+            }
+            
         } catch (Exception e) {
             System.err.println("[EditorController] Unexpected error in joinRoom: " + e.getMessage());
         }

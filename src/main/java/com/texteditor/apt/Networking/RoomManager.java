@@ -1,8 +1,9 @@
 package com.texteditor.apt.Networking;
 
-import org.springframework.stereotype.Component;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.springframework.stereotype.Component;
 
 @Component
 public class RoomManager {
@@ -10,6 +11,10 @@ public class RoomManager {
     public static final int MAX_USERS_PER_ROOM = 4;
 
     private final ConcurrentHashMap<String, Set<String>> rooms = new ConcurrentHashMap<>();
+
+    public Set<String> getUsers(String docId) {
+        return rooms.getOrDefault(docId, ConcurrentHashMap.newKeySet());
+    }
 
     public boolean joinRoom(String docId, String userId) {
         rooms.putIfAbsent(docId, ConcurrentHashMap.newKeySet());

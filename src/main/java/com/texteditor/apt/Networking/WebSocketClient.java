@@ -68,6 +68,17 @@ public class WebSocketClient {
                                 }
                             }
                         });
+                        
+                        session.subscribe("/topic/doc/" + docId + "/presence/" + userId, new StompFrameHandler() {
+                        @Override
+                        public Type getPayloadType(StompHeaders headers) { return NetworkMessage.class; }
+
+                        @Override
+                        public void handleFrame(StompHeaders headers, Object payload) {
+                        NetworkMessage presenceMsg = (NetworkMessage) payload;
+                        Platform.runLater(() -> presencePanel.addUser(presenceMsg.userID, getNextColorSlot()));
+                        }
+                        });
 
                         session.subscribe("/topic/doc/" + docId + "/sync/" + userId, new StompFrameHandler() {
                             @Override
