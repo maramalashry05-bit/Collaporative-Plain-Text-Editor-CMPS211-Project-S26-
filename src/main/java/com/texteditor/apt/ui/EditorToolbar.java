@@ -17,7 +17,6 @@ public class EditorToolbar extends HBox {
     private final TextField  titleField;
     private final Button     boldBtn;
     private final Button     italicBtn;
-    private final Button     shareBtn;
     private final Button     undoBtn;
     private final Button     redoBtn;
     private final Button     backBtn;
@@ -85,16 +84,9 @@ public class EditorToolbar extends HBox {
         Region gapBeforeShare = new Region();
         gapBeforeShare.setPrefWidth(8);
 
-        shareBtn = new Button("Share");
-        shareBtn.setStyle(
-            "-fx-background-color: #4A90E2; " +
-            "-fx-text-fill: white; " +
-            "-fx-font-size: 12px; " +
-            "-fx-font-weight: bold; " +
-            "-fx-background-radius: 6; " +
-            "-fx-padding: 6 14 6 14; " +
-            "-fx-cursor: hand;"
-        );
+       
+        
+   
 
         Region gapBeforeStatus = new Region();
         gapBeforeStatus.setPrefWidth(10);
@@ -107,7 +99,6 @@ public class EditorToolbar extends HBox {
             titleField,
             spacer,
             boldBtn, italicBtn, gapBeforeShare,
-            shareBtn, gapBeforeStatus,
             statusLabel
         );
     }
@@ -131,7 +122,6 @@ public class EditorToolbar extends HBox {
 
     public Button   getBoldBtn()    { return boldBtn;    }
     public Button   getItalicBtn()  { return italicBtn;  }
-    public Button   getShareBtn()   { return shareBtn;   }
     public Button   getUndoBtn()    { return undoBtn;    }
     public Button   getRedoBtn()    { return redoBtn;    }
     public Button   getBackBtn()    { return backBtn;    }
